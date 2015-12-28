@@ -166,6 +166,9 @@ Template.listsShow.events({
     var text = $input.val();
     var existing = Todos.findOne({
       listId: this._id,
+      textLowerCase: text.toLowerCase()
+    }) || Todos.findOne({
+      listId: this._id,
       text: text
     });
 
@@ -185,6 +188,7 @@ Template.listsShow.events({
       Todos.insert({
         listId: this._id,
         text: text,
+        textLowerCase: text.toLowerCase(),
         checked: false,
         createdAt: new Date()
       });
