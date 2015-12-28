@@ -162,14 +162,40 @@ Template.listsShow.events({
     var $input = $(event.target).find('[type=text]');
     if (! $input.val())
       return;
-
-    Todos.insert({
+    
+    var text = $input.val();
+    var existing = Todos.findOne({
       listId: this._id,
-      text: $input.val(),
-      checked: false,
-      createdAt: new Date()
+      text: text
     });
-    Lists.update(this._id, {$inc: {incompleteCount: 1}});
+
+    if (existing) {
+      // task exists in this list, uncheck and move to top
+      Todos.update({
+        _id: existing._id
+      },{
+        $set: {
+          checked: false,
+          createdAt: new Date()
+        }
+      });
+    } 
+    else {
+      // task does not exist
+      Todos.insert({
+        listId: this._id,
+        text: text,
+        checked: false,
+        createdAt: new Date()
+      });
+    }
+    
+    var incompleteCount = Todos.find({
+      listId: this._id,
+      checked: false
+    }).count();
+
+    Lists.update(this._id, {$set: {incompleteCount: incompleteCount}});
     $input.val('');
   }
 });
